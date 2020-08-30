@@ -79,14 +79,15 @@ class ChatServiceItem: ChatRowItem {
                     if peerIds.first == authorId {
                         let _ =  attributedString.append(string: tr(L10n.chatServiceGroupAddedSelf(authorName)), color: grayTextColor, font: NSFont.normal(theme.fontSize))
                     } else {
-                        let _ =  attributedString.append(string: tr(L10n.chatServiceGroupAddedMembers(authorName, "")), color: grayTextColor, font: NSFont.normal(theme.fontSize))
+                        let _ =  attributedString.append(string: tr(L10n.chatServiceGroupAddedMembers(authorName, "peerNames")), color: grayTextColor, font: NSFont.normal(theme.fontSize))
+                        let peerNames:NSMutableAttributedString = NSMutableAttributedString()
                         for peerId in peerIds {
                             
                             if let peer = message.peers[peerId] {
-                                let range = attributedString.append(string: peer.displayTitle, color: nameColor(peer.id), font: .medium(theme.fontSize))
-                                attributedString.add(link:inAppLink.peerInfo(link: "", peerId:peerId, action:nil, openChat: false, postId: nil, callback: chatInteraction.openInfo), for: range, color: nameColor(peerId))
+                                let range = peerNames.append(string: peer.displayTitle, color: nameColor(peer.id), font: .medium(theme.fontSize))
+                                peerNames.add(link:inAppLink.peerInfo(link: "", peerId:peerId, action:nil, openChat: false, postId: nil, callback: chatInteraction.openInfo), for: range, color: nameColor(peerId))
                                 if peerId != peerIds.last {
-                                    _ = attributedString.append(string: ", ", color: grayTextColor, font: .normal(theme.fontSize))
+                                    _ = peerNames.append(string: ", ", color: grayTextColor, font: .normal(theme.fontSize))
                                 }
                                 
                             }
@@ -97,6 +98,8 @@ class ChatServiceItem: ChatRowItem {
                         attributedString.add(link:inAppLink.peerInfo(link: "", peerId:authorId, action:nil, openChat: false, postId: nil, callback: chatInteraction.openInfo), for: range, color: nameColor(authorId))
                         attributedString.addAttribute(.font, value: NSFont.medium(theme.fontSize), range: range)
                     }
+                    let range = attributedString.string.nsstring.range(of: "peerNames")
+                    attributedString.replaceCharacters(in: range, with: peerNames)
                     
                 case let .removedMembers(peerIds):
                     if peerIds.first == message.author?.id {
